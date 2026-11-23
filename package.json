@@ -1,0 +1,15 @@
+{
+  "name": "hunan-weather-submission-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "湖南气象市县动态文风自动写稿与投稿助手",
+  "scripts": {
+    "start": "node server.js",
+    "daily": "node src/daily.js"
+  },
+  "dependencies": {
+    "@tencent-ai/workbuddy-cloud-sdk": "dev",
+    "express": "^4.21.2"
+  }
+}

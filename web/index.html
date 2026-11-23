@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>投稿助手 · 市县动态写稿机器人</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">云</div>
+      <div>
+        <div class="brand-title">投稿助手</div>
+        <div class="brand-sub">湖南气象 · 市县动态文风写稿机器人</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-chip" id="modelChip">模型：加载中</span>
+      <button class="btn ghost" id="settingsBtn">⚙ 设置</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 对话写稿区 -->
+    <section class="panel chat-panel">
+      <div class="panel-head">
+        <div>
+          <h2>写稿机器人</h2>
+          <p>输入工作素材或主题，自动生成市县动态稿件</p>
+        </div>
+        <button class="btn tiny" id="dailyBtn">生成今日草稿</button>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="msg bot">
+          <div class="avatar">助</div>
+          <div class="bubble">
+            您好！我是市县动态写稿助手。<br />
+            把工作素材发给我，例如「11月22日，新邵县气象局开展区域站巡检和信息员培训……」，我会按湖南气象市县动态文风写成一篇完整稿件。<br />
+            <span class="dim">也可以点右上角「生成今日草稿」。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-topics" id="quickTopics">
+        <button data-topic="新邵县气象局联合应急管理局开展低温雨雪冰冻灾害应急演练">低温灾害应急演练</button>
+        <button data-topic="新邵县气象局组织气象信息员开展预警信号业务培训">预警业务培训</button>
+        <button data-topic="新邵县气象局开展气象科普进校园活动">气象科普进校园</button>
+        <button data-topic="新邵县气象局联合多部门开展防雷安全专项检查">防雷联合检查</button>
+      </div>
+
+      <div class="composer">
+        <textarea id="inputBox" rows="3" placeholder="粘贴工作素材、简讯或写稿主题……"></textarea>
+        <div class="composer-actions">
+          <span class="hint" id="hint">Enter 发送 · Shift+Enter 换行</span>
+          <button class="btn primary" id="sendBtn">生成稿件</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 稿件审核区 -->
+    <section class="panel drafts-panel">
+      <div class="panel-head">
+        <div>
+          <h2>稿件审核</h2>
+          <p>审核通过后将提交到投稿平台</p>
+        </div>
+        <button class="btn ghost tiny" id="refreshBtn">刷新</button>
+      </div>
+      <div class="filters" id="filters">
+        <button class="active" data-status="all">全部</button>
+        <button data-status="draft">待审核</button>
+        <button data-status="approved">已通过</button>
+        <button data-status="submitted">已投稿</button>
+        <button data-status="rejected">已驳回</button>
+      </div>
+      <div class="draft-list" id="draftList">
+        <div class="empty">还没有稿件，先在左侧生成一篇吧。</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 稿件详情 -->
+  <div class="modal-mask" id="draftModal" hidden>
+    <div class="modal wide">
+      <div class="modal-head">
+        <h3>稿件详情</h3>
+        <button class="icon-btn" data-close="draftModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">标题</label>
+        <input id="editTitle" class="input" />
+        <label class="field-label">正文</label>
+        <textarea id="editContent" class="input content-area" rows="18"></textarea>
+        <div class="meta-line" id="editMeta"></div>
+        <div class="notice" id="submitNotice" hidden></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="copyBtn">复制稿件</button>
+        <button class="btn ghost" id="pushBtn">推送到微信</button>
+        <button class="btn ghost" id="regenBtn">重新生成</button>
+        <button class="btn danger" id="rejectBtn">驳回</button>
+        <button class="btn primary" id="approveBtn">审核通过并投稿</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="modal-mask" id="settingsModal" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3>系统设置</h3>
+        <button class="icon-btn" data-close="settingsModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">写稿模型</label>
+        <select id="modelSelect" class="input"><option value="auto">Auto（自动）</option></select>
+
+        <label class="field-label">PushPlus token</label>
+        <input id="pushplusTokenInput" class="input" placeholder="在 pushplus.plus 登录后复制用户 token" />
+        <p class="tip">微信扫码登录 pushplus.plus → 关注公众号 → 复制首页的 token 填入。账号需完成实名认证（免费），否则无法发送。</p>
+
+        <label class="field-label">审核页面外网地址（可选）</label>
+        <input id="reviewUrlInput" class="input" placeholder="如：http://192.168.1.10:3000 或已发布的网址" />
+        <p class="tip">填入后，微信收到的稿件消息会带上可直接点击的审核链接；留空则不显示审核提示。</p>
+
+        <label class="field-label">投稿平台名称</label>
+        <input id="platformName" class="input" placeholder="如：湖南气象投稿平台" />
+
+        <label class="field-label">投稿接口地址（可选）</label>
+        <input id="platformUrl" class="input" placeholder="审核通过后自动 POST 稿件 JSON 到此地址" />
+        <p class="tip">留空时审核通过后提示手动复制提交。接口需接收 {title, content, source, submittedAt}。</p>
+
+        <label class="checkbox-line">
+          <input type="checkbox" id="dailyEnabled" /> 启用每日写稿
+        </label>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="testPushBtn">测试微信推送</button>
+        <button class="btn primary" id="saveSettingsBtn">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

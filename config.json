@@ -1,0 +1,19 @@
+{
+  "model": "auto",
+  "orgName": "新邵县气象局",
+  "wechatArticleUrls": [],
+  "pushplusToken": "",
+  "reviewBaseUrl": "",
+  "submitPlatform": {
+    "name": "投稿平台",
+    "url": "",
+    "method": "POST"
+  },
+  "server": {
+    "port": 3000
+  },
+  "daily": {
+    "enabled": true,
+    "autoPush": true
+  }
+}
